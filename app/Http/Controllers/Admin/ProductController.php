@@ -122,7 +122,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-
+        // todo comfirm client deleted
         $product = Product::find($id);
 
         $this->deleteImage($product);
@@ -164,7 +164,6 @@ class ProductController extends Controller
         ]);
 
         $request->file('thumbnail')->move(env('UPLOAD_PATH', './uploads'), $picture->uri);
-
     }
 
     /**
