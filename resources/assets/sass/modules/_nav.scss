@@ -1,0 +1,23 @@
+.navigation, .pagination {
+  margin: 0 auto;
+  width: 40%;
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    display: inline-block;
+    padding: 1rem;
+    font-size: $font-nav;
+  }
+  a {
+    color: $color-nav;
+  }
+}
+
+@media (max-width: 320px) {
+  .navigation li {
+    display: block;
+  }
+}

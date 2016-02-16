@@ -1,0 +1,13 @@
+/vendor
+/node_modules
+Homestead.yaml
+Homestead.json
+.env
+.idea/
+fabfile.py
+fabfile.pyc
+install.sh
+deploy.sh
+composer.lock
+public/uploads/*.[a-z]*
+storage

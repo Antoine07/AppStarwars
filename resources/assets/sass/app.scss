@@ -1,0 +1,25 @@
+@import "modules/variable";
+@import "modules/nav";
+@import "modules/mixin";
+
+/* ------------------------------------------------- *\
+    Figure
+\* ------------------------------------------------- */
+
+.figure {
+  padding:0 1rem;
+}
+
+.btn-opened, .btn-closed, .btn-add {
+  border-bottom: 3px solid #b83018;
+  display: block;
+  @include border-radius(10px);
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn-opened{background: #13747D; width: auto;}
+.btn-closed{background: #cf361b; width: auto;}
+.btn-add{background: #13747D;width: 100px;}
+
+#loading{display: none;}

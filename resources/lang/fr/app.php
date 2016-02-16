@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'tag'            => 'Mot clé: ',
+    'noTag'          => 'Aucun mot clé',
+    'home'           => 'Accueil',
+    'maxCharContent' => 'Max 255 caractères',
+    'emailAddress'   => 'Votre email: (*)',
+    'messageContact' => 'Votre message (*)',
+    'contactSuccess' => 'Merci pour votre message',
+    'backToHome'     => 'Retour à la page accueil',
+    'catName'        => 'Catégorie: ',
+    'noCat'          => 'non catégorisé',
+    'price'          => 'Prix ',
+    'name'           => 'Nom produit: ',
+    'slugName'       => 'slug: ',
+    'tagName'        => 'Mot(s) clé(s):',
+    'abstract'       => 'texte court: ',
+    'content'        => 'description du produit: ',
+    'price'          => 'Prix: ',
+    'quantity'       => 'Quantité: ',
+    'date'           => 'date de publication (maintenant): ',
+    'status'         => 'Mettre en ligne le produit: ',
+    'create'         => 'Ajouter un produit',
+    'backHome'       => 'revenir à la page d\'accueil',
+    'logout'         => 'se déloguer',
+    'listProduct'    => 'revenir à la liste des produits',
+];
