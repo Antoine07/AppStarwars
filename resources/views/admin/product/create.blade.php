@@ -14,6 +14,7 @@
     <input class="input-text" id="name" name="name" type="text" value="{{old('name')}}" >
     @if($errors->has('name')) <span class="error">{{$errors->first('name')}}</span> @endif
 </div>
+
 <div class="form-text">
     <label class="label" for="slug">{{trans('app.slugName')}}</label>
     <input class="input-text" id="slug" name="slug" type="text" value="{{old('slug')}}" >
@@ -52,7 +53,7 @@
 </div>
 <div class="form-select">
     <label for="tag">{{trans('app.TagName')}}</label>
-    <select id="tag" name="tags[]" multiple>
+    <select id="tag" name="tag_id[]" multiple>
         @foreach($tags as $id => $name)
             <option value="{{$id}}">{{$name}}</option>
         @endforeach
@@ -60,7 +61,7 @@
 </div>
 <div class="form-text">
     <label class="label" for="published_at">{{trans('app.date')}}</label>
-    <input class="input-text" id="published_at" name="published_at" type="radio" value="true" >
+    <input class="input-text" id="published_at" name="published_at" type="checkbox">
     @if($errors->has('published_at')) <span class="error">{{$errors->first('published_at')}}</span> @endif
 </div>
 <div class="input-radio">
@@ -70,8 +71,8 @@
 </div>
 <div class="input-file">
     <h2>{{trans('app.image')}}</h2>
-    <input class="file" type="file" name="thumbnail" >
-    @if($errors->has('thumbnail')) <span class="error">{{$errors->first('thumbnail')}}</span> @endif
+    <input class="file" type="file" name="picture" >
+    @if($errors->has('picture')) <span class="error">{{$errors->first('picture')}}</span> @endif
 </div>
 </aside>
 <div class="form-submit">

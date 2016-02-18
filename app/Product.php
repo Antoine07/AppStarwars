@@ -52,7 +52,9 @@ class Product extends Model
     {
         if ($value == '0000-00-00 00:00:00') return 'no date';
 
-        return Carbon::parse($value)->format('d/m/Y h:i:s');;
+        return Carbon::parse($value)->format('d/m/Y h:i:s');
+
+
     }
 
     public function scopeOnline($query)
@@ -73,7 +75,7 @@ class Product extends Model
     public function setPublishedAtAttribute($value)
     {
         // Carbon\Carbon::createFromFormat('d/m/Y', '13/01/2016');
-        $this->attributes['published_at'] = (empty($value)) ? '0000-00-00 00:00:00' : Carbon::now('Europe/Paris');
+        $this->attributes['published_at'] = (empty($value)) ? '0000-00-00 00:00:00' : date('Y-m-d h:i:s');
     }
 
     public function hasTag($id)

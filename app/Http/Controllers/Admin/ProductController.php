@@ -11,6 +11,7 @@ use App\Category;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
 {
@@ -45,15 +46,14 @@ class ProductController extends Controller
      * @param Requests\ProductRequest|Request $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Requests\ProductRequest $request)
+    public function store(ProductRequest $request)
     {
-
         $product = Product::create($request->all());
 
-        if (!empty($request->input('tags')))
-            $product->tags()->attach($request->input('tags'));
+        if (!empty($request->input('tag_id')))
+            $product->tags()->attach($request->input('tag_id'));
 
-        if (!is_null($request->file('thumbnail'))) {
+        if (!empty($request->file('picture'))) {
             $this->upload($request, $product);
         }
 
@@ -93,20 +93,26 @@ class ProductController extends Controller
      * @param $id
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Requests\ProductRequest $request, $id)
+    public function update(ProductRequest $request, $id)
     {
         $product = Product::find($id);
 
-        if (!empty($request->input('tags')))
-            $product->tags()->sync($request->input('tags'));
-        else
-            $product->tags()->detach();
+        $tags = !empty($request->input('tag_id')) ? $request->input('tag_id') : [];
 
-        if ($request->input('delete') == 'true') $this->deleteImage($product);
+        $product->tags()->sync($tags);
 
-        if (!is_null($request->file('thumbnail'))) {
-            $this->deleteImage($product);
-            $this->upload($request, $product);
+        if ($request->input('deletePicture') == 'true') {
+            $deletePicture = $this->deletePicture($product);
+        }
+
+        $im = $request->file('picture');
+
+        if (!is_null($im)) {
+
+            if (empty($deletePicture))
+                $this->deletePicture($product);
+
+            $this->upload($im, $product->id);
         }
 
         $product->update($request->all());
@@ -125,7 +131,7 @@ class ProductController extends Controller
         // todo comfirm client deleted
         $product = Product::find($id);
 
-        $this->deleteImage($product);
+        $this->deletePicture($product);
 
         $product->delete();
 
@@ -148,33 +154,41 @@ class ProductController extends Controller
     }
 
     /**
-     * @param Request $request
-     * @param $product
+     * @param $im
+     * @param $productId
      */
-    private function upload(Request $request, $product)
+    private function upload($im, $productId)
     {
-        $im = $request->file('thumbnail');
-
         $ext = $im->getClientOriginalExtension();
-        $picture = Picture::create([
-            'uri'        => $uri = str_random(12) . '.' . $ext,
+        $uri = str_random(12) . '.' . $ext;
+        Picture::create([
+            'uri'        => $uri,
             'size'       => $im->getSize(),
             'type'       => $ext,
-            'product_id' => $product->id
+            'product_id' => $productId
         ]);
 
-        $request->file('thumbnail')->move(env('UPLOAD_PATH', './uploads'), $picture->uri);
+        $im->move(env('UPLOAD_PATH', './uploads'), $uri);
     }
 
     /**
-     * @param $p
+     * @param Product $p
+     * @return bool
      */
-    private function deleteImage($p)
+    private function deletePicture(Product $p)
     {
         if (!is_null($p->picture)) {
-            Storage::delete($p->picture->uri);
+            $fileName = $p->picture->uri;
+
+            if (Storage::exists($fileName))
+                Storage::delete($fileName);
+
             $p->picture->delete();
+
+            return true;
         }
+
+        return false;
     }
 
 }

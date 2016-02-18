@@ -45,16 +45,17 @@
 <aside class="col w33">
 <div class="form-select">
 <label for="tag">{{trans('app.catName')}}</label>
-<select name="category_id">
+
+    <select name="category_id">
 @foreach($categories as $id => $title)
-    <option value="{{$id}}" {{$product->category_id==$id? 'selected' : ''}}>{{$title}}</option>
+    <option value="{{$id}}" {{($product->category_id==$id )? 'selected' : ''}}>{{$title}}</option>
 @endforeach
-    <option value="0">{{trans('app.noCat')}}</option>
+    <option {{(is_null($product->category_id))? 'selected' : ''}} value="0">{{trans('app.noCat')}}</option>
 </select>
 </div>
 <div class="form-select">
     <label for="tag">{{trans('app.TagName')}}</label>
-    <select id="tag" name="tags[]" multiple>
+    <select id="tag" name="tag_id[]" multiple>
         @foreach($tags as $id => $name)
             <option value="{{$id}}" {{$product->hasTag($id)? 'selected' : ''}}>{{$name}}</option>
         @endforeach
@@ -73,14 +74,14 @@
 </div>
 <div class="input-file">
     <h2>{{trans('app.image')}}</h2>
-    @if($product->picture)
+    @if(!is_null($product->picture))
         <img src="{{url('uploads',$product->picture->uri)}}" width="100">
-        <p><label for="delete">{{trans('app.deleteImage')}}</label> <input id="delete" type="radio" name="delete" value="true" /></p>
+        <p><label for="deletePicture">{{trans('app.deleteImage')}}</label> <input id="deletePicture" type="radio" name="deletePicture" value="true" /></p>
         <h2>{{trans('app.removeImage')}}</h2>
     @endif
-    <input class="file" type="file" name="thumbnail">
+    <input class="file" type="file" name="picture">
 
-    @if($errors->has('image')) <span class="error">{{$errors->first('thumbnail')}}</span> @endif
+    @if($errors->has('picture')) <span class="error">{{$errors->first('picture')}}</span> @endif
 </div>
 </aside>
 <div class="form-submit">

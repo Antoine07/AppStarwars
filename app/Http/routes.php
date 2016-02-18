@@ -29,9 +29,7 @@ Route::group(['middleware' => ['web']], function () {
     });
 
     Route::get('logout', 'LoginController@logout');
-
     Route::post('prod/ajax', 'FrontController@onePage');
-
     Route::get('deleteOne/{id}', 'FrontController@deleteOne');
 
     /*

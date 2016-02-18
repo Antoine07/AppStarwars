@@ -31,7 +31,7 @@ class ProductRequest extends Request
             'quantity'     => 'integer',
             'published_at' => 'in:true',
             'status'       => 'in:opened,closed',
-            'thumbnail'    => 'image|max:3000',
+            'picture'      => 'image|max:3000',
             'delete'       => 'in:true'
         ];
     }
