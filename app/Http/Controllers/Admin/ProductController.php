@@ -179,7 +179,7 @@ class ProductController extends Controller
     private function deletePicture(Product $p)
     {
         if (!is_null($p->picture)) {
-            $fileName = $p->picture->uri;
+            $fileName = public_path('uploads'). DIRECTORY_SEPARATOR. $p->picture->uri;
 
             if (File::exists($fileName))
                 File::delete($fileName);
