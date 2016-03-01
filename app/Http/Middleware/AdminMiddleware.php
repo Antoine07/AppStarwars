@@ -16,10 +16,8 @@ class AdminMiddleware
      */
     public function handle($request, Closure $next)
     {
-//        if ($request->user()->role == 'visitor')
-//            return redirect()->cart();
 
-        if ($request->user()->role != 'administrator')
+        if (!$request->user()->isSuperAdmin())
             return redirect()->home();
 
         return $next($request);

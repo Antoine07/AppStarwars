@@ -16,7 +16,8 @@ class CreatePicturesTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('product_id');
             $table->string('title', 100);
-            $table->string('uri');
+            $table->string('uri',100);
+            $table->string('mime',100);
             $table->smallInteger('size');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('CASCADE');
             $table->timestamps();

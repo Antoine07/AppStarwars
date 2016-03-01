@@ -54,7 +54,7 @@ class ProductController extends Controller
             $product->tags()->attach($request->input('tag_id'));
 
         if (!empty($request->file('picture'))) {
-            $this->upload($request, $product);
+            $this->upload($request->file('picture'), $product->id);
         }
 
         return redirect('product')->with(['message' => 'success add']);
@@ -162,9 +162,10 @@ class ProductController extends Controller
         $ext = $im->getClientOriginalExtension();
         $uri = str_random(12) . '.' . $ext;
         Picture::create([
-            'uri'        => $uri,
-            'size'       => $im->getSize(),
-            'type'       => $ext,
+            'uri' => $uri,
+            'size' => $im->getSize(),
+            'type' => $ext,
+            'mime' => $im->getClientMimeType(),
             'product_id' => $productId
         ]);
 

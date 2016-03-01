@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\History;
+use App\Picture;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use View;
@@ -286,6 +287,15 @@ class FrontController extends Controller
 
         $expiresAt = Carbon::now()->addMinutes($time);
         Cache::put($url, $data, $expiresAt);
+    }
+
+    public function getFile($productId){
+
+        $entry = Picture::where('product_id', '=', $productId)->firstOrFail();
+        $file = Storage::disk('local')->get($entry->uri);
+
+        return (new Response($file, 200))
+            ->header('Content-Type', $entry->mime);
     }
 
 }

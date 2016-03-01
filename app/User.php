@@ -28,4 +28,17 @@ class User extends Authenticatable
     {
         return $this->hasOne('App\Customer');
     }
+
+    public function isSuperAdmin()
+    {
+        if (!empty($this->role))
+            return $this->role == 'administrator';
+
+        return false;
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(History::class);
+    }
 }

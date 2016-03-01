@@ -16,8 +16,11 @@
             @if(Auth::user() && Auth::user()->role == 'visitor')
                 <li><a href="{{url('logout')}}">{{trans('app.logout')}}</a></li>
                 <li>{{trans('app.visitor')}} {{Auth::user()->name}}</li>
+                <a href="{{ route('customer.show', [Auth::user()->id]) }}">{{trans('app.customer')}}</a>
+
             @else
                 <li><a href="{{url('login')}}">{{trans('app.login')}}</a></li>
+                <li><a href="{{url('inscription')}}">{{trans('app.inscription')}}</a></li>
             @endif
         @endif
     </ul>

@@ -26,7 +26,7 @@ class PictureTableSeeder extends Seeder
         DB::table('pictures')->delete();
         DB::statement("ALTER TABLE pictures AUTO_INCREMENT=1");
 
-        $files = Storage::allFiles();
+        $files = Storage::allFiles( );
 
         foreach ($files as $file) Storage::delete($file);
 
@@ -36,16 +36,19 @@ class PictureTableSeeder extends Seeder
 
             $uri = str_random(12) . '_370x235.jpg';
 
+            $fileName = file_get_contents('http://lorempixel.com/futurama/370/235');
+
             Storage::put(
-                $uri,
-                file_get_contents('http://lorempixel.com/futurama/370/235')
+                $uri, $fileName
             );
+
+            $mime = mime_content_type(storage_path('app').DIRECTORY_SEPARATOR.$uri);
 
             Picture::create([
                 'product_id' => $product->id,
                 'uri'        => $uri,
                 'title'      => $this->facker->name,
-                'type'       => 'jpg',
+                'mime'       => $mime,
                 'size'       => 200,
             ]);
         }
