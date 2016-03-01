@@ -4,7 +4,7 @@
     {{ $product->abstract }}
     @if($picture = $product->picture)
         <figure class="fl figure">
-            <a href="{{url('prod', [$product->id,$product->slug])}}"><img src="{{route('get', $product->id)}}" alt="{{$picture->title}}" class="img-responsive" /></a>
+            <a href="{{url('prod', [$product->id,$product->slug])}}"><img src="{{url('uploads',[$picture->uri])}}" alt="{{$picture->title}}" class="img-responsive" /></a>
         </figure>
     @endif
     @if($cat=$product->category)

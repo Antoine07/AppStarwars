@@ -11,16 +11,15 @@
         @if(Auth::check() && Auth::user()->role=='administrator')
             <li><a href="{{url('dashboard')}}">{{trans('app.dashboard')}}</a></li>
             <li><a href="{{url('logout')}}">{{trans('app.logout')}}</a></li>
-            <li>{{trans('app.administrator')}} {{Auth::user()->name}}</li>
+            <li><a href="{{ route('customer.show', [Auth::user()->id]) }}">{{Auth::user()->name}}</a></li>
         @else
             @if(Auth::user() && Auth::user()->role == 'visitor')
                 <li><a href="{{url('logout')}}">{{trans('app.logout')}}</a></li>
-                <li>{{trans('app.visitor')}} {{Auth::user()->name}}</li>
-                <a href="{{ route('customer.show', [Auth::user()->id]) }}">{{trans('app.customer')}}</a>
+                <li><a href="{{ route('customer.show', [Auth::user()->id]) }}">{{Auth::user()->name}}</a></li>
 
             @else
                 <li><a href="{{url('login')}}">{{trans('app.login')}}</a></li>
-                <li><a href="{{url('inscription')}}">{{trans('app.inscription')}}</a></li>
+                <li><a href="{{url('inscription/step-one')}}">{{trans('app.inscription')}}</a></li>
             @endif
         @endif
     </ul>

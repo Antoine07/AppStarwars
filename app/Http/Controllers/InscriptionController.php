@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Customer;
+use App\User;
+use App\Http\Controllers\Menu\TraitMainMenu;
 use Illuminate\Http\Request;
 
 use App\Http\Requests;
@@ -9,79 +12,61 @@ use App\Http\Controllers\Controller;
 
 class InscriptionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+
+    use TraitMainMenu;
+
+    public function __construct()
     {
-        //
+        $this->getMenu();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function getStepOne()
     {
-        //
+
+        $user = null;
+        if(session()->has('user')) $user = session()->get('user');
+
+        return view('inscription.step_one', compact('user'));
+
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function postStepOne(Request $request)
     {
-        //
+
+        $id='';
+        $userExist = session()->has('user');
+
+        if($userExist){
+            $user = session()->get('user');
+            $id = ",$user->id";
+        }
+
+        $this->validate($request, [
+            'email'=>'required|email|unique:users,email'.$id,
+            'name' => 'required|max:3'
+        ]);
+
+        if($userExist){
+            $user = User::findOrFail($user->id);
+            $user->update($request->all());
+        }else
+            $user = User::create($request->all());
+
+        session()->put('user', $user);
+
+        return redirect('inscription/step-two');
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+
+    public function getStepTwo()
     {
-        //
+
+       $user = session()->get('user');
+
+       return view('inscription.step_two', compact('user'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

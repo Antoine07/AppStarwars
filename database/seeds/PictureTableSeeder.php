@@ -24,11 +24,13 @@ class PictureTableSeeder extends Seeder
 //        Eloquent::unguard();
 
         DB::table('pictures')->delete();
-        DB::statement("ALTER TABLE pictures AUTO_INCREMENT=1");
+        DB::statement("ALTER TABLE avatars AUTO_INCREMENT=1");
 
-        $files = Storage::allFiles( );
+        $dirUploads = public_path(env('UPLOAD_PICTURES', 'uploads'));
 
-        foreach ($files as $file) Storage::delete($file);
+        $files = File::allFiles($dirUploads);
+
+        foreach ($files as $file) File::delete($file);
 
         $products = Product::all();
 
@@ -38,18 +40,20 @@ class PictureTableSeeder extends Seeder
 
             $fileName = file_get_contents('http://lorempixel.com/futurama/370/235');
 
-            Storage::put(
-                $uri, $fileName
+            $pathDirectory = $dirUploads. DIRECTORY_SEPARATOR.$uri;
+
+            FILE::put(
+                $pathDirectory, $fileName
             );
 
-            $mime = mime_content_type(storage_path('app').DIRECTORY_SEPARATOR.$uri);
+            $mime = mime_content_type($dirUploads. DIRECTORY_SEPARATOR . $uri);
 
             Picture::create([
                 'product_id' => $product->id,
-                'uri'        => $uri,
-                'title'      => $this->facker->name,
-                'mime'       => $mime,
-                'size'       => 200,
+                'uri' => $uri,
+                'title' => $this->facker->name,
+                'mime' => $mime,
+                'size' => 200,
             ]);
         }
     }

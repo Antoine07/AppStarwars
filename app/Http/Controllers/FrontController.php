@@ -2,21 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\History;
-use App\Picture;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
+use App\Avatar;
+use Auth;
 use View;
 use Mail;
-use Auth;
+use Storage;
+use App\History;
+use App\Picture;
 use App\Product;
 use App\Category;
 use App\Customer;
 use App\Cart\Cart;
+use Carbon\Carbon;
 use App\Score\IScore;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\Menu\TraitMainMenu;
 
 
@@ -144,9 +146,9 @@ class FrontController extends Controller
     {
 
         $this->validate($request, [
-            'id'       => 'required|integer',
+            'id' => 'required|integer',
             'quantity' => 'required|integer',
-            'price'    => 'required|numeric'
+            'price' => 'required|numeric'
         ]);
 
         $product = Product::findOrFail($request->input('id'));
@@ -165,11 +167,11 @@ class FrontController extends Controller
     {
 
         $this->validate($request, [
-            'reset.*'      => 'integer',
+            'reset.*' => 'integer',
             'product_id.*' => 'integer',
-            'delete'       => 'in:true',
-            'quantity.*'   => 'integer',
-            'id.*'         => 'integer',
+            'delete' => 'in:true',
+            'quantity.*' => 'integer',
+            'id.*' => 'integer',
         ]);
 
         if (!empty($request->input('reset'))) {
@@ -195,8 +197,8 @@ class FrontController extends Controller
 
                 History::create([
                     'product_id' => $id,
-                    'user_id'    => $request->user()->id,
-                    'quantity'   => $request->input('quantity' . $id)
+                    'user_id' => $request->user()->id,
+                    'quantity' => $request->input('quantity' . $id)
                 ]);
             }
 
@@ -240,7 +242,7 @@ class FrontController extends Controller
     {
 
         $this->validate($request, [
-            'email'   => 'required|email',
+            'email' => 'required|email',
             'content' => 'required|max:255'
         ]);
 
@@ -253,7 +255,7 @@ class FrontController extends Controller
 
         return redirect('contact')->with([
             'message' => trans('app.contactSuccess'),
-            'alert'   => 'success'
+            'alert' => 'success'
         ]);
     }
 
@@ -289,13 +291,17 @@ class FrontController extends Controller
         Cache::put($url, $data, $expiresAt);
     }
 
-    public function getFile($productId){
+    /**
+     * @param $productId
+     * @return mixed
+     */
+    public function getFile($userId)
+    {
+        $avatar = Avatar::where('user_id', '=', (int)$userId)->firstOrFail();
+        $file = Storage::disk('local')->get(env('UPLOAD_AVATARS') . DIRECTORY_SEPARATOR . $avatar->uri);
 
-        $entry = Picture::where('product_id', '=', $productId)->firstOrFail();
-        $file = Storage::disk('local')->get($entry->uri);
+        return response($file, 200)->header('Content-Type', $avatar->mime);
 
-        return (new Response($file, 200))
-            ->header('Content-Type', $entry->mime);
     }
 
 }

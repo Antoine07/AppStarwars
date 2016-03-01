@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use View;
-use Storage;
+use File;
 use App\Tag;
 use App\Product;
 use App\Picture;
@@ -181,8 +181,8 @@ class ProductController extends Controller
         if (!is_null($p->picture)) {
             $fileName = $p->picture->uri;
 
-            if (Storage::exists($fileName))
-                Storage::delete($fileName);
+            if (File::exists($fileName))
+                File::delete($fileName);
 
             $p->picture->delete();
 

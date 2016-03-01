@@ -3,16 +3,16 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
-\Debugbar::disable();
-
 Route::pattern('id', '[1-9][0-9]*');
 Route::pattern('slug', '[a-z0-9-\_]+');
 Route::pattern('filename', '[a-zA-Z0-9\_\.]+');
 
-Route::get('file/{filename}', [
-    'as' => 'get', 'uses' => 'FrontController@getFile']);
+
 
 Route::group(['middleware' => ['web']], function () {
+
+    Route::get('file/{filename}', [
+        'as' => 'get', 'uses' => 'FrontController@getFile']);
 
     Route::get('/', ['as' => 'home', 'uses' => 'FrontController@index']);
 
@@ -28,7 +28,7 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('send', 'FrontController@sendContact');
 
     Route::resource('customer', 'CustomerController');
-    Route::resource('inscription', 'InscriptionController');
+    Route::controller('inscription', 'InscriptionController');
 
     // limit 60 requests per one minute from a single address IP, throttle
     Route::group(['middleware' => ['throttle:60,1']], function () {
