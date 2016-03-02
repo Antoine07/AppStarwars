@@ -12,7 +12,7 @@ Route::pattern('filename', '[a-zA-Z0-9\_\.]+');
 Route::group(['middleware' => ['web']], function () {
 
     Route::get('file/{filename}', [
-        'as' => 'get', 'uses' => 'FrontController@getFile']);
+        'as' => 'get', 'uses' => 'FrontController@getAvatar']);
 
     Route::get('/', ['as' => 'home', 'uses' => 'FrontController@index']);
 

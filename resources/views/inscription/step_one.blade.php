@@ -13,7 +13,7 @@
             @if($errors->has('email')) <span class="error">{{$errors->first('email')}}</span> @endif
         </div>
         <div class="form-text">
-            <label class="label" for="name">{{trans('app.name')}}</label>
+            <label class="label" for="name">{{trans('app.username')}}</label>
             <input class="input-text" id="name" name="name" type="name" value="{{!empty($user)? $user->name: old('name')}}" >
             @if($errors->has('name')) <span class="error">{{$errors->first('name')}}</span> @endif
         </div>

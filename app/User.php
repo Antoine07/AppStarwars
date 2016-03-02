@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
@@ -29,6 +30,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Customer');
     }
 
+    public function histories()
+    {
+        return $this->hasMany(History::class);
+    }
+
     public function isSuperAdmin()
     {
         if (!empty($this->role))
@@ -37,8 +43,8 @@ class User extends Authenticatable
         return false;
     }
 
-    public function histories()
+    public function setPasswordAttribute($value)
     {
-        return $this->hasMany(History::class);
+        $this->attributes['password'] = Hash::make($value);
     }
 }

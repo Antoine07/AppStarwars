@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Avatar;
+use App\Events\ScoreEvent;
+use App\Score;
 use Auth;
 use View;
 use Mail;
@@ -193,13 +195,19 @@ class FrontController extends Controller
         }
 
         if (!empty($request->input('product_id'))) {
+
+
             foreach ($request->input('product_id') as $id) {
 
+                $quantity = (int) $request->input('quantity' . $id);
                 History::create([
                     'product_id' => $id,
                     'user_id' => $request->user()->id,
-                    'quantity' => $request->input('quantity' . $id)
+                    'quantity' => $quantity
                 ]);
+
+                \Event::fire(new ScoreEvent($id, $quantity));
+
             }
 
             $cookie = $cart->reset();
@@ -295,7 +303,7 @@ class FrontController extends Controller
      * @param $productId
      * @return mixed
      */
-    public function getFile($userId)
+    public function getAvatar($userId)
     {
         $avatar = Avatar::where('user_id', '=', (int)$userId)->firstOrFail();
         $file = Storage::disk('local')->get(env('UPLOAD_AVATARS') . DIRECTORY_SEPARATOR . $avatar->uri);
