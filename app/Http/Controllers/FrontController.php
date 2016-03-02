@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Avatar;
-use App\Events\ScoreEvent;
-use App\Score;
+use Mail;
 use Auth;
 use View;
-use Mail;
 use Storage;
+use App\Score;
+use App\Avatar;
 use App\History;
 use App\Picture;
 use App\Product;
@@ -18,6 +17,7 @@ use App\Cart\Cart;
 use Carbon\Carbon;
 use App\Score\IScore;
 use App\Http\Requests;
+use App\Events\ScoreEvent;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Cache;
@@ -33,11 +33,21 @@ class FrontController extends Controller
     protected $score = null;
     protected $cacheTime = 120;
     private $cart;
+    protected $product;
+    protected $history;
+    protected $avatar;
+    protected $category;
+    protected $picture;
+    protected $customer;
 
-    public function __construct(Cart $cart)
+    public function __construct(Cart $cart, Product $product, Category $category, History $history)
     {
         $this->getMenu();
+
         $this->cart = $cart;
+        $this->category = $category;
+        $this->product = $product;
+        $this->history = $history;
     }
 
     /**
@@ -48,7 +58,7 @@ class FrontController extends Controller
     {
         $title = " Welcome Home page";
 
-        $products = Product::with('tags', 'category', 'picture')
+        $products = $this->product->with('tags', 'category', 'picture')
             ->online()
             ->orderBy('published_at', 'desc')
             ->paginate($this->paginate);
@@ -69,7 +79,7 @@ class FrontController extends Controller
         if ($request->ajax()) {
             $offset = (int)$request->input('offset') + 1;
 
-            $products = Product::with('tags', 'category', 'picture')->skip($offset)->take(5)->get();
+            $products = $this->product->with('tags', 'category', 'picture')->skip($offset)->take(5)->get();
             $count = $offset;
 
             if (count($products) > 0)
@@ -92,19 +102,19 @@ class FrontController extends Controller
     {
         $product = $this->getCache($request);
 
-        $id = (int) $id;
+        $id = (int)$id;
 
         if (!$product) {
-            $product = Product::with('category', 'tags', 'picture')->findOrFail($id);
+            $product = $this->product->with('category', 'tags', 'picture')->findOrFail($id);
             $this->putCache($request, $product);
         }
 
         $title = " Page product:{$product->name}";
 
         $qStorage = 0;
-        if($this->cart->getQuantity($id)) $qStorage = $this->cart->getQuantity($id);
+        if ($this->cart->getQuantity($id)) $qStorage = $this->cart->getQuantity($id);
 
-        $quantities = ($qStorage >= $product->quantity)? null : range(1, $product->quantity-$qStorage) ;
+        $quantities = ($qStorage >= $product->quantity) ? null : range(1, $product->quantity - $qStorage);
 
         $pop = $score->score($product->id);
 
@@ -119,7 +129,7 @@ class FrontController extends Controller
     public function showProductByCategory($id, $slug = '', Request $request)
     {
 
-        $category = Category::findOrFail($id);
+        $category = $this->category->findOrFail($id);
         $title = " Welcome category page {$category->title}";
 
         $products = $this->getCache($request);
@@ -159,7 +169,13 @@ class FrontController extends Controller
             'price' => 'required|numeric'
         ]);
 
-        $product = Product::findOrFail($request->input('id'));
+        $product = $this->product->findOrFail($request->input('id'));
+
+        if (is_null($product->quantity_lock))
+            $product->quantity_lock = $product->quantity;
+
+        $product->quantity = ($product->quantity - (int)$request->input('quantity'));
+        $product->save();
 
         $this->cart->buy($product, $request->input('quantity'));
 
@@ -201,11 +217,10 @@ class FrontController extends Controller
 
         if (!empty($request->input('product_id'))) {
 
-
             foreach ($request->input('product_id') as $id) {
 
-                $quantity = (int) $request->input('quantity' . $id);
-                History::create([
+                $quantity = (int)$request->input('quantity' . $id);
+                $this->history->create([
                     'product_id' => $id,
                     'user_id' => $request->user()->id,
                     'quantity' => $quantity
@@ -224,7 +239,6 @@ class FrontController extends Controller
 
     /**
      * @param $id
-     * @param Cart $cart
      * @return \Illuminate\Http\RedirectResponse
      */
     public function deleteOne($id)
@@ -232,6 +246,14 @@ class FrontController extends Controller
         $id = (int)$id;
 
         $this->cart->restore($id);
+
+        // todo restore quantity dispo
+
+        $product = $this->product->findOrFail($id);
+
+        $product->quantity = $product->quantity_lock;
+        $product->quantity_lock = null;
+        $product->save();
 
         return back()->with(['message' => trans('app.deleteOneProductSuccess')]);
 

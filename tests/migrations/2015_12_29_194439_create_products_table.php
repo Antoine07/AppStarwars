@@ -15,15 +15,11 @@ class CreateProductsTable extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 100);
-            $table->integer('category_id')->unsigned()->nullable();
-            $table->text('abstract');
-            $table->text('content');
             $table->decimal('price',5,2);
             $table->smallInteger('quantity');
             $table->smallInteger('quantity_lock')->nullable();
             $table->enum('status', ['opened', 'closed'])->default('opened');
             $table->dateTime('published_at');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('SET NULL');
             $table->timestamps();
         });
     }

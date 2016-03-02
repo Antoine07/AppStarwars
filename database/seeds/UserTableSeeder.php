@@ -68,7 +68,7 @@ class UserTableSeeder extends Seeder
 
             $uri = str_random(12) . '_216x256.jpg';
 
-            $fileName = file_get_contents('http://lorempixel.com/216/256/people');
+            $fileName = file_get_contents('http://lorempixel.com/216/256/animals');
 
             $pathDirectory = env('UPLOADS_AVATARS', 'avatars') . DIRECTORY_SEPARATOR . $uri;
 

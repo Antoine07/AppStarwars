@@ -142,3 +142,8 @@ Route::group(['middleware' => ['web']], function () {
 //Route::get('test4', function (App\Score\IScore $score) {
 //    dd($score->get(100));
 //});
+
+/*Route::get('test4', function (App\Score\IScore $score) {
+   var_dump(app()->make('App\Cart\Cart'));
+   var_dump(app()->make('App\Product'));
+});*/
