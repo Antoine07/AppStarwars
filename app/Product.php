@@ -78,6 +78,11 @@ class Product extends Model
         $this->attributes['published_at'] = (empty($value)) ? '0000-00-00 00:00:00' : date('Y-m-d h:i:s');
     }
 
+    public function setQuantityAtAttribute($value)
+    {
+        $this->attributes['quantity'] = ($value >= $this->quantity)? 0 : ($this->quantity-$value);
+    }
+
     public function hasTag($id)
     {
         foreach ($this->tags as $tag) {

@@ -10,13 +10,6 @@
             <input type="hidden" name="product_id[]" value="{{$id}}"/>
             <li> price: {{$product['price']}}, {{$product['name']}}, {{trans('app.quantity')}} {{$product['quantity']}}
                 <br/>
-                <label for="change">{{trans('app.changeQuantity')}}: </label>
-                <select name="quantity{{$id}}" class="select">
-                    @foreach(range(1,$product['max']) as $q)
-                        <option {{$product['quantity'] == $q ? 'selected' : ''}} value="{{$q}}">{{$q}}</option>
-                    @endforeach
-                </select>
-                <br/>
                 <label for="reset{{$id}}">{{trans('app.deleteOne')}}: </label><a class="btn btn-danger" href="{{url('deleteOne', ['product_id'=>$id])}}">{{trans('app.deleteJustOne')}}(-1)</a>
             </li>
         @empty

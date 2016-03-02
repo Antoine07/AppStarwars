@@ -32,10 +32,12 @@ class FrontController extends Controller
     protected $paginate = 5;
     protected $score = null;
     protected $cacheTime = 120;
+    private $cart;
 
-    public function __construct()
+    public function __construct(Cart $cart)
     {
         $this->getMenu();
+        $this->cart = $cart;
     }
 
     /**
@@ -90,13 +92,19 @@ class FrontController extends Controller
     {
         $product = $this->getCache($request);
 
+        $id = (int) $id;
+
         if (!$product) {
             $product = Product::with('category', 'tags', 'picture')->findOrFail($id);
             $this->putCache($request, $product);
         }
 
         $title = " Page product:{$product->name}";
-        $quantities = range(1, $product->quantity);
+
+        $qStorage = 0;
+        if($this->cart->getQuantity($id)) $qStorage = $this->cart->getQuantity($id);
+
+        $quantities = ($qStorage >= $product->quantity)? null : range(1, $product->quantity-$qStorage) ;
 
         $pop = $score->score($product->id);
 
@@ -126,25 +134,23 @@ class FrontController extends Controller
     }
 
     /**
-     * @param Cart $cart
      * @return View
      */
-    public function showCart(Cart $cart)
+    public function showCart()
     {
-        $products = $cart->getCart();
+        $products = $this->cart->getCart();
 
-        $total = $cart->total();
-        $number = $cart->count();
+        $total = $this->cart->total();
+        $number = $this->cart->count();
 
         return view('front.cart', compact('products', 'total', 'number'));
     }
 
     /**
      * @param Request $request
-     * @param Cart $cart
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function storeProduct(Request $request, Cart $cart)
+    public function storeProduct(Request $request)
     {
 
         $this->validate($request, [
@@ -155,17 +161,16 @@ class FrontController extends Controller
 
         $product = Product::findOrFail($request->input('id'));
 
-        $cart->buy($product, $request->input('quantity'));
+        $this->cart->buy($product, $request->input('quantity'));
 
         return back()->with(['message' => trans('app.thank')]);
     }
 
     /**
      * @param Request $request
-     * @param Cart $cart
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function updatedCommand(Request $request, Cart $cart)
+    public function updatedCommand(Request $request)
     {
 
         $this->validate($request, [
@@ -178,14 +183,14 @@ class FrontController extends Controller
 
         if (!empty($request->input('reset'))) {
             foreach ($request->input('reset') as $id) {
-                $cart->delete($id);
+                $this->cart->delete($id);
             }
 
             return back()->with(['message' => trans('app.deleteProduct')]);
         }
 
         if (!empty($request->input('delete'))) {
-            $cookie = $cart->reset();
+            $cookie = $this->cart->reset();
 
             return back()->withCookie($cookie)->with(['message' => trans('app.cartEmpty')]);
         }
@@ -210,7 +215,7 @@ class FrontController extends Controller
 
             }
 
-            $cookie = $cart->reset();
+            $cookie = $this->cart->reset();
 
             return redirect()->home()->withCookie($cookie)->with(['message' => trans('app.thankForYourCommand')]);
         }
@@ -222,11 +227,11 @@ class FrontController extends Controller
      * @param Cart $cart
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function deleteOne($id, Cart $cart)
+    public function deleteOne($id)
     {
         $id = (int)$id;
 
-        $cart->restore($id);
+        $this->cart->restore($id);
 
         return back()->with(['message' => trans('app.deleteOneProductSuccess')]);
 
@@ -300,7 +305,7 @@ class FrontController extends Controller
     }
 
     /**
-     * @param $productId
+     * @param $userId
      * @return mixed
      */
     public function getAvatar($userId)

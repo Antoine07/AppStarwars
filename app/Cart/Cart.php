@@ -86,4 +86,18 @@ class Cart implements \Countable
         return $this->storage->getValue($id);
     }
 
+    /**
+     * get quantity product into storage
+     * @param $id
+     * @return null
+     */
+    public function getQuantity($id)
+    {
+        $storage =  $this->storage->getValue($id);
+
+        if(isset($storage['quantity'])) return $storage['quantity'];
+
+        return null;
+    }
+
 }
