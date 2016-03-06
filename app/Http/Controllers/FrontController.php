@@ -190,22 +190,17 @@ class FrontController extends Controller
     {
 
         $this->validate($request, [
-            'reset.*' => 'integer',
             'product_id.*' => 'integer',
             'delete' => 'in:true',
             'quantity.*' => 'integer',
             'id.*' => 'integer',
         ]);
 
-        if (!empty($request->input('reset'))) {
-            foreach ($request->input('reset') as $id) {
-                $this->cart->delete($id);
-            }
-
-            return back()->with(['message' => trans('app.deleteProduct')]);
-        }
-
         if (!empty($request->input('delete'))) {
+
+            foreach ($this->cart->getCart() as $id => $storage)
+                $this->restoreProductLock($id, 'all');
+
             $cookie = $this->cart->reset();
 
             return back()->withCookie($cookie)->with(['message' => trans('app.cartEmpty')]);
@@ -247,13 +242,7 @@ class FrontController extends Controller
 
         $this->cart->restore($id);
 
-        // todo restore quantity dispo
-
-        $product = $this->product->findOrFail($id);
-
-        $product->quantity = $product->quantity_lock;
-        $product->quantity_lock = null;
-        $product->save();
+        $this->restoreProductLock($id);
 
         return back()->with(['message' => trans('app.deleteOneProductSuccess')]);
 
@@ -324,6 +313,34 @@ class FrontController extends Controller
 
         $expiresAt = Carbon::now()->addMinutes($time);
         Cache::put($url, $data, $expiresAt);
+    }
+
+    /**
+     * restore product quantity when is lock and not commanded
+     *
+     * @param int $id id product
+     */
+    private function restoreProductLock($id, $sub = 1)
+    {
+        $product = $this->product->findOrFail($id);
+
+        if ($sub == 'all') {
+            $product->quantity = $product->quantity_lock;
+            $product->quantity_lock = null;
+            $product->save();
+
+            return;
+        }
+
+        if ($product->quantity > 0) {
+            $product->quantity -= $sub;
+        } else {
+            $product->quantity = $product->quantity_lock;
+            $product->quantity_lock = null;
+        }
+        $product->save();
+
+        return;
     }
 
     /**

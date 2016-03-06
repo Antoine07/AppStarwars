@@ -7,16 +7,16 @@ use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 
-class CartControllerTest extends TestCase
+class FrontControllerTest extends TestCase
 {
 
     protected $cart;
-    protected $product;
 
     public function setUp()
     {
         parent::setUp();
 
+        $this->app->bind('App\Cart\IStorage', 'Stub\ArrayStorage');
         $this->cart = $this->app['App\Cart\Cart'];
 
     }
@@ -31,11 +31,20 @@ class CartControllerTest extends TestCase
             '--path' => './tests/migrations',
         ]);
 
-        $this->product = Product::create([
+        Product::create([
             'id' => 1,
             'name' => 'test product',
             'price' => 10.5,
             'quantity' => 10,
+            'quantity_lock' => null,
+            'published_at' => \Carbon\Carbon::now()
+        ]);
+
+        Product::create([
+            'id' => 2,
+            'name' => 'test product',
+            'price' => 10.5,
+            'quantity' => 7,
             'quantity_lock' => null,
             'published_at' => \Carbon\Carbon::now()
         ]);
@@ -46,17 +55,20 @@ class CartControllerTest extends TestCase
     }
 
     /**
-     * service provider cart
+     * service provider cart object exist and the storage is stubbed
      *
      * @test
      */
     public function testServiceProviderCart()
     {
         $this->assertInstanceOf('App\Cart\Cart', $this->cart);
+        $this->assertEquals([], $this->cart->getCart());
 
     }
 
     /**
+     * validate rules store product
+     *
      * @test validation store product
      */
     public function testValidateStoreProduct()
@@ -75,16 +87,18 @@ class CartControllerTest extends TestCase
     }
 
     /**
+     * store product with specific product values
+     *
      * @test quantity command into storage and update model product
      */
     public function testStoreProduct()
     {
 
-        $credentials =['id' => 1, 'quantity' => 7, 'price' => 10.5];
+        $credentials = ['id' => 1, 'quantity' => 7, 'price' => 10.5];
 
-        $response = $this->action('POST', 'FrontController@storeProduct', $credentials );
+        $response = $this->action('POST', 'FrontController@storeProduct', $credentials);
 
-        $product = $this->product->find(1);
+        $product = Product::find(1);
 
         $this->assertEquals(3, $product->quantity);
         $this->assertEquals(10, $product->quantity_lock);
@@ -98,24 +112,68 @@ class CartControllerTest extends TestCase
     }
 
     /**
+     * restore product with specific product values
+     *
      * @test restore product
      */
     public function testRestoreProduct()
     {
-        $product = $this->product->find(1);
+        $product = Product::find(1);
         $product->quantity = 3;
         $product->quantity_lock = 10;
         $product->save();
 
-        $response = $this->action('GET', 'FrontController@deleteOne', ['id' => 1] );
+        $this->cart->buy($product, 3);
 
-        $p = $this->product->find(1);
+        $response = $this->action('GET', 'FrontController@deleteOne', ['id' => 1]);
 
-        $this->assertEquals(10, $p->quantity);
-        $this->assertEquals(null, $p->quantity_lock);
+        $p = Product::find(1);
+
+        $this->assertEquals(2, $p->quantity);
+        $this->assertEquals(10, $p->quantity_lock);
+
+        $qStorage = $this->cart->getQuantity(1);
+
+        $this->assertEquals(2, $qStorage);
+    }
+
+    /**
+     * test with two products into storage and reset all products, check if storage and product entity are rested
+     *
+     * @test
+     */
+    public function testResetAll()
+    {
+
+        $p1 = Product::find(1);
+        $p1->quantity = 5;
+        $p1->quantity_lock = 10;
+        $p1->save();
+
+        $p2 = Product::find(2);
+        $p2->quantity = 2;
+        $p2->quantity_lock = 7;
+        $p2->save();
+
+        $this->cart->buy($p1,5);
+        $this->cart->buy($p2,2);
+
+        $credentials = ['delete' => 'true'];
+
+        $response = $this->action('POST', 'FrontController@updatedCommand', $credentials);
+
+        $p1 = Product::find(1);
+        $p2 = Product::find(2);
+
+        $this->assertEquals(10, $p1->quantity);
+        $this->assertEquals(null, $p1->quantity_lock);
+
+        $this->assertEquals(7, $p2->quantity);
+        $this->assertEquals(null, $p2->quantity_lock);
 
         $qStorage = $this->cart->getQuantity(1);
 
         $this->assertEquals(0, $qStorage);
+
     }
 }
